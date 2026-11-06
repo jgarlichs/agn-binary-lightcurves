@@ -3,6 +3,7 @@ name = "agn-binary-lightcurves"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
+    "astropy>=8.0.2",
     "astroquery>=0.4.11",
     "numpy>=2.5.4",
     "scipy>=1.18.1",
