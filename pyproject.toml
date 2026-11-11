@@ -5,6 +5,7 @@ requires-python = ">=3.14"
 dependencies = [
     "astropy>=8.0.2",
     "astroquery>=0.4.11",
+    "dynesty>=3.1.0",
     "ipykernel>=7.4.0",
     "matplotlib>=3.11.2",
     "matplotlib-inline>=0.2.2",

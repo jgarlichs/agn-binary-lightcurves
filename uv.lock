@@ -14,6 +14,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "astropy" },
     { name = "astroquery" },
+    { name = "dynesty" },
     { name = "ipykernel" },
     { name = "matplotlib" },
     { name = "matplotlib-inline" },
@@ -26,6 +27,7 @@ dependencies = [
 requires-dist = [
     { name = "astropy", specifier = ">=8.0.2" },
     { name = "astroquery", specifier = ">=0.4.11" },
+    { name = "dynesty", specifier = ">=3.1.0" },
     { name = "ipykernel", specifier = ">=7.4.0" },
     { name = "matplotlib", specifier = ">=3.11.2" },
     { name = "matplotlib-inline", specifier = ">=0.2.2" },
@@ -431,6 +433,20 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/ef/f9/4383635281999c3eaa44bf327de523ba42240b35eb87c1130adac4a829c6/debugpy-1.8.22-cp315-cp315-win32.whl", hash = "sha256:225d063f81708c2546999e7edfac0198b2d5c2f144797dc64858f867948633e0", size = 5359469, upload-time = "2026-09-15T21:44:43.234Z" },
     { url = "https://files.pythonhosted.org/packages/7b/14/4fe9f46a9c825c8cbc6dc4aebc2a885b0bceb37ce2a37699c170482e7a40/debugpy-1.8.22-cp315-cp315-win_amd64.whl", hash = "sha256:b17a4896520f1c6da09ce76ec8215df0b85b0b6f3617526a4c65c2315340875a", size = 5397869, upload-time = "2026-09-15T21:44:44.783Z" },
     { url = "https://files.pythonhosted.org/packages/56/3d/c7dc9f35bc9e22cdb53679f844bee40fd5cff871862f60595869a433400d/debugpy-1.8.22-py2.py3-none-any.whl", hash = "sha256:a9e9d3550e15ca479c59333e90845029190531f0cacfedab3b815a57bd913947", size = 5374857, upload-time = "2026-09-15T21:44:54.454Z" },
+]
+
+[[package]]
+name = "dynesty"
+version = "3.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c4/75/db494edc8abfe2273b9cb08c87a2a1165c6ae90d76f746980ef07ec5303a/dynesty-3.1.0.tar.gz", hash = "sha256:851717431f04f749bca45e86704c28fecf9f3b10f85a2a69820b26e42cefab68", size = 35564761, upload-time = "2026-07-17T14:38:31.465Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f1/f9/41c72d0b5fb511fdf23cf62ed50da6c73d4497f03ed1cad04f214dc477c8/dynesty-3.1.0-py3-none-any.whl", hash = "sha256:4e5b77bb261abdcb98e3a538d7498a94d5882a848f0ea46924b404396ef036d5", size = 106027, upload-time = "2026-07-17T14:38:28.523Z" },
 ]
 
 [[package]]
