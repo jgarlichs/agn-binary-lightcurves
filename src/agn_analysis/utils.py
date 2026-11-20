@@ -250,3 +250,36 @@ def plot_fitted_model(lc: AGNLC, result, n_grid=500):
 
     return fig, ax
 
+
+LATEX_LABELS = {
+    "m": r"$m$",
+    "nu": r"$\nu$",
+    "log_sigmahat2": r"$\log \hat{\sigma}^2$",
+    "log_tau0": r"$\log \tau_0$",
+    "gamma": r"$\gamma$",
+    "A": r"$A$",
+    "phi": r"$\phi$",
+    "T0": r"$T_0$",
+    "Tq": r"$T_{\mathrm{q}}$",
+}
+
+
+
+def plot_corner(lc: AGNLC, model: String):
+    posterior = pd.read_csv(f"../data/results/{lc.oid}/{model}_posterior.csv")
+    params = [*posterior]
+    labels = [
+        LATEX_LABELS.get(param, param)
+        for param in params
+    ]
+
+    fig = corner.corner(
+        posterior[params].to_numpy(),
+        labels=labels,
+        quantiles=[0.16, 0.5, 0.84],
+        show_titles=True,
+        title_fmt=".2f"
+    )
+
+    plt.show()
+
