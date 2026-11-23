@@ -9,8 +9,8 @@ import corner
 import json
 from scipy.linalg import solve_triangular
 import matplotlib.pyplot as plt
-SCRIPT_DIR = Path(__file__).resolve().parent
-STYLE_PATH = SCRIPT_DIR.parent / "light.mplstyle"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+STYLE_PATH = PROJECT_ROOT.parent / "src" / "light.mplstyle"
 plt.style.use(STYLE_PATH)
 
 # different hypothesis models
@@ -248,6 +248,7 @@ def plot_fitted_model(lc: AGNLC, result, n_grid=500):
     ax.set_title(f"AGN {lc.oid} - {model}")
     ax.legend()
     plt.tight_layout()
+    plt.savefig(PROJECT_ROOT.parent / "data" / "results" / str(lc.oid) / f"{model}_fitted_lc.png")
     plt.show()
 
     return fig, ax
@@ -268,7 +269,8 @@ LATEX_LABELS = {
 
 
 def plot_corner(lc: AGNLC, model: str):
-    posterior = pd.read_csv(f"../data/results/{lc.oid}/{model}_posterior.csv")
+    result_folder = PROJECT_ROOT.parent / "data" / "results" / str(lc.oid)
+    posterior = pd.read_csv(result_folder / f"{model}_posterior.csv")
     params = [*posterior]
     labels = [
         LATEX_LABELS.get(param, param)
@@ -282,6 +284,6 @@ def plot_corner(lc: AGNLC, model: str):
         show_titles=True,
         title_fmt=".2f"
     )
-
+    plt.savefig(result_folder / f"{model}_fitted_lc.png")
     plt.show()
 
