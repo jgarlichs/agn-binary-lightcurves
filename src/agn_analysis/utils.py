@@ -9,7 +9,9 @@ import corner
 import json
 from scipy.linalg import solve_triangular
 import matplotlib.pyplot as plt
-plt.style.use("../src/light.mplstyle")
+SCRIPT_DIR = Path(__file__).resolve().parent
+STYLE_PATH = SCRIPT_DIR.parent / "light.mplstyle"
+plt.style.use(STYLE_PATH)
 
 # different hypothesis models
 MODELS = ("red", "red_sine", "red_qpo", "drw", "drw_sine", "red_qpo_sine")
@@ -265,7 +267,7 @@ LATEX_LABELS = {
 
 
 
-def plot_corner(lc: AGNLC, model: String):
+def plot_corner(lc: AGNLC, model: str):
     posterior = pd.read_csv(f"../data/results/{lc.oid}/{model}_posterior.csv")
     params = [*posterior]
     labels = [
