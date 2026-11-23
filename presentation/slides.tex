@@ -46,7 +46,7 @@
 \setbeamersize{text margin left=0.65cm,text margin right=0.65cm}
 
 \title[Assessing AGN Light-Curves]{Bayesian Inference of\\AGN Light Curves}
-\subtitle{Stochastic variability, periodic signals, and model comparison}
+\subtitle{Toward the identification of supermassive binary BHs}
 \author[Julian Garlichs & Tim Zurbriggen]{Julian Garlichs and Tim Zurbriggen}
 \date{\today}
 
@@ -167,8 +167,56 @@
 \section{Background}
 \sectiondivider{Background and Modeling}
 
-\begin{frame}{AGN variability as a stochastic process}
-  At observing epochs $t_i$, model the measured light curve as
+\begin{frame}{Physical Background}
+
+
+\begin{columns}[T,onlytextwidth]
+    \begin{column}{0.66\textwidth}
+      \centering
+      \researchfigure{figures/data_model.pdf}{4.85cm}
+    \end{column}
+    \begin{column}{0.31\textwidth}
+       Active galactic nucleis (AGNs) are active supermassive black holes at the center of galaxies that emit electromagnetic radiation as dust and gas falls into them. 
+    \end{column}
+  \end{columns}
+  \vspace{0.05cm}
+  {\scriptsize\color{Muted}Figure: Observed Light Curve of ... using ZTF data.}
+    
+\end{frame}
+
+\begin{frame}{Bayesian Inference}
+  Assuming stationary Gaussian noise, the likelihood function for a quasar light curve is
+
+  \begin{equation*}
+      \boxed{\displaystyle\mathcal{L}(\mathbf{d}| \Vec{\theta}_n, \Vec{\theta}_s, m) = \frac{1}{\sqrt{(2\pi)^N |\mathbf{C}|}} \exp \left[ -\frac{1}{2} (\mathbf{d - m - s})^\top \mathbf{C}^{-1} (\mathbf{d - m - s)} \right]}
+  \end{equation*}
+
+  where 
+  \begin{itemize}
+      \item $\mathbf{d}$ is time-series light curve data of length $N$
+      \item $\Vec{\theta}_n$ and $\Vec{\theta}_s$ are our model parameters and include noise and signal parameters respectively
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame}{Bayesian Inference}
+  Assuming stationary Gaussian noise, the likelihood function for a quasar light curve is
+
+  \begin{equation*}
+      \boxed{\displaystyle\mathcal{L}(\mathbf{d}| \Vec{\theta}_n, \Vec{\theta}_s, m) = \frac{1}{\sqrt{(2\pi)^N |\mathbf{C}|}} \exp \left[ -\frac{1}{2} (\mathbf{d - m - s})^\top \mathbf{C}^{-1} (\mathbf{d - m - s)} \right]}
+  \end{equation*}
+
+  We model $\mathbf{d}$ as
+
+  \begin{equation*}
+      \mathbf{d = n + m + s}
+  \end{equation*}
+
+  wehre $\mathbf{n}$ is the noise vector, $\mathbf{m}$ accounts for the mean magnitude and $\mathbf{s}$ is the signal vector defined as 
+
+  \begin{equation*}
+      \mathbf{s}(t) = A\sin (2\pi f_0 t + \phi).
+  \end{equation*}
   
 \end{frame}
 
