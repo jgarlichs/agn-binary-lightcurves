@@ -38,5 +38,5 @@ for lcdata in files:
 
         print(f"Fitting {model}-model to LC data:")
         result = fit_model(lc, model, NLIVE, BATCHES, SEED, outdir=RESULTS_PATH)
-        plot_fitted_model(lc, result)
-        plot_corner(lc, model)
+        plot_fitted_model(lc, result, show=False)
+        plot_corner(lc, model, show=False)

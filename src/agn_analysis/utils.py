@@ -287,7 +287,7 @@ def plot_corner(lc: AGNLC, model: str, show=True):
         show_titles=True,
         title_fmt=".2f"
     )
-    plt.savefig(result_folder / f"{model}_fitted_lc.png")
+    plt.savefig(result_folder / f"{model}_corner.png")
     if show:
         plt.show()
     else:
