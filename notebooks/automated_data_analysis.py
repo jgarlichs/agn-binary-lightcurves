@@ -17,11 +17,11 @@ RESULTS_PATH = SCRIPT_DIR.parent / "data" / "results"
 
 MODELS = ["red", "red_qpo_sine"] # list of models used
 
-NLIVE = 500
+NLIVE = 100
 BATCHES = 3
 SEED = 42
 
-OVERWRITE = False
+OVERWRITE = True
 
 if OBJECTS is None:
     files = [f for f in LIGHTCURVE_PATH.iterdir() if f.is_file()]
@@ -34,6 +34,9 @@ for lcdata in files:
         result_file = RESULTS_PATH / str(lc.oid) / f"{model}_results.json"
         if not OVERWRITE and result_file.exists():
             print(f"Skipping {lc.oid} / {model}: already fitted.")
+            continue
 
         print(f"Fitting {model}-model to LC data:")
         result = fit_model(lc, model, NLIVE, BATCHES, SEED, outdir=RESULTS_PATH)
+        plot_fitted_model(lc, result)
+        plot_corner(lc, model)

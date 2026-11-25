@@ -188,7 +188,7 @@ def fit_model(lc: AGNLC, model: str, nlive: int, maxbatch: int, seed: int, outdi
     return model_result
 
 
-def plot_fitted_model(lc: AGNLC, result, n_grid=500):
+def plot_fitted_model(lc: AGNLC, result, n_grid=500, show=True):
     model = result["model"]
     p = result["maximum_likelihood_sample"]["parameters"]
 
@@ -249,7 +249,10 @@ def plot_fitted_model(lc: AGNLC, result, n_grid=500):
     ax.legend()
     plt.tight_layout()
     plt.savefig(PROJECT_ROOT.parent / "data" / "results" / str(lc.oid) / f"{model}_fitted_lc.png")
-    plt.show()
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)
 
     return fig, ax
 
@@ -268,7 +271,7 @@ LATEX_LABELS = {
 
 
 
-def plot_corner(lc: AGNLC, model: str):
+def plot_corner(lc: AGNLC, model: str, show=True):
     result_folder = PROJECT_ROOT.parent / "data" / "results" / str(lc.oid)
     posterior = pd.read_csv(result_folder / f"{model}_posterior.csv")
     params = [*posterior]
@@ -285,5 +288,13 @@ def plot_corner(lc: AGNLC, model: str):
         title_fmt=".2f"
     )
     plt.savefig(result_folder / f"{model}_fitted_lc.png")
-    plt.show()
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)
+
+def read_result_json(lc: AGNLC, model: str):
+    RESULTS_PATH = PROJECT_ROOT.parent / "data" / "results" / f"{lc.oid}" / f"{model}_results.json"
+    result = json.loads(RESULTS_PATH.read_text(encoding="utf-8"))
+    return result
 
