@@ -9,7 +9,10 @@ import matplotlib.pyplot as plt
 SCRIPT_DIR = Path(__file__).resolve().parent
 STYLE_PATH = SCRIPT_DIR.parent / "src" / "light.mplstyle"
 plt.style.use(STYLE_PATH)
-from agn_analysis.utils import AGNLC, load_lc, fit_model, plot_fitted_model, plot_corner
+from agn_analysis.model import AGNLC
+from agn_analysis.data import load_lc
+from agn_analysis.fitting import fit_model
+from agn_analysis.plotting import plot_corner, plot_fitted_model
 
 OBJECTS = ["UM211"] # list of objects to analyse (None if all)
 LIGHTCURVE_PATH = SCRIPT_DIR.parent / "data" / "lightcurves"
