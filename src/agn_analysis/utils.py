@@ -40,7 +40,7 @@ def theta_names(model: str):
     return names
 
 class AGNLC:
-    def __init__(self, oid: int, t_mjd: np.ndarray, mag: np.ndarray, magerr: np.ndarray):
+    def __init__(self, oid: int, t_mjd: np.ndarray, mag: np.ndarray, magerr: np.ndarray, filter_settings: dict | None = None):
         t_mjd = np.asarray(t_mjd, dtype=float)
         self.y = np.asarray(mag, dtype=float)
         self.dy = np.asarray(magerr, dtype=float)
@@ -61,6 +61,9 @@ class AGNLC:
 
         # prior on mean magnitude m 
         self.prior_m = (float(np.median(self.y) - 1), float(np.median(self.y) + 1))
+
+        # store filter settings
+        self.filter_settings = filter_settings
 
     def prior_transform(self, u: np.ndarray, model: str):
         names = theta_names(model)
@@ -122,7 +125,7 @@ def outlier_mask(t_days, y, dy, window=30.0, threshold=5.0, min_neighbours=5):
     keep[has_ref] = np.abs(z[has_ref]) <= threshold
     return keep
 
-def load_lc(path: Path, time_col: str, mag_col: str, err_col: str, filtercode: str, mask_outlier: bool = True, window: float = 30.0, threshold: float = 5.0, min_neighbours: int = 5):
+def load_lc(path: Path, time_col: str, mag_col: str, err_col: str, filtercode: str, mask_outliers: bool = True, window: float = 30.0, threshold: float = 5.0, min_neighbours: int = 5):
 
     if filtercode not in ["zg", "zr", "zi"]:
         raise ValueError("Choose a filtercode between zg, zr or zi.")
@@ -142,13 +145,20 @@ def load_lc(path: Path, time_col: str, mag_col: str, err_col: str, filtercode: s
     good = np.isfinite(df.to_numpy()).all(axis=1)
     df = df.loc[good]
 
-    if mask_outlier:
+    if mask_outliers:
         keep = outlier_mask(df[time_col].to_numpy(), df[mag_col].to_numpy(), df[err_col].to_numpy(), window=window, threshold=threshold, min_neighbours=min_neighbours)
         print(f"Outlier clipping removed {(~keep).sum()} of {len(keep)} points.")
         df = df.loc[keep]
 
     print(f"Loaded {len(df)} valid observations from {path} in band {filtercode}.")
-    return AGNLC(oid, df[time_col].to_numpy(), df[mag_col].to_numpy(), df[err_col].to_numpy())
+
+    filter_settings = {
+        "filtercode": filtercode,
+        "outlier_mask": mask_outliers,
+        "clipping": {"window": window, "threshold": threshold, "min_neighbours": min_neighbours} if mask_outliers else None,
+    }
+
+    return AGNLC(oid, df[time_col].to_numpy(), df[mag_col].to_numpy(), df[err_col].to_numpy(), filter_settings)
 
 def fit_model(lc: AGNLC, model: str, nlive: int, maxbatch: int, seed: int, outdir: Path | None = None):
     names = theta_names(model)
@@ -208,6 +218,7 @@ def fit_model(lc: AGNLC, model: str, nlive: int, maxbatch: int, seed: int, outdi
             name: [float(v) for v in (lc.prior_m if name == "m" else PRIOR_RANGES[name])]
             for name in names
         },
+        "filter_settings": lc.filter_settings,
     }
 
     if outdir is not None:
