@@ -8,7 +8,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 from .model import AGNLC, PRIOR_RANGES, theta_names
 
 
-def fit_model(lc: AGNLC, model: str, nlive: int, maxbatch: int, seed: int, outdir: Path | None = None):
+def fit_model(lc: AGNLC, model: str, nlive: int, maxbatch: int, seed: int, print_progress: bool = True):
     names = theta_names(model)
 
     def transform(u):
@@ -18,7 +18,7 @@ def fit_model(lc: AGNLC, model: str, nlive: int, maxbatch: int, seed: int, outdi
 
     sampler = dynesty.DynamicNestedSampler(logl, transform, ndim=len(names), nlive=nlive, bound="multi", sample="rwalk", rstate=np.random.default_rng(seed))
 
-    sampler.run_nested(nlive_init=nlive, nlive_batch=max(50, nlive // 2), dlogz_init=0.2, maxbatch=maxbatch, print_progress=True)
+    sampler.run_nested(nlive_init=nlive, nlive_batch=max(50, nlive // 2), dlogz_init=0.2, maxbatch=maxbatch, print_progress=print_progress)
 
     result = sampler.results
 
@@ -26,10 +26,10 @@ def fit_model(lc: AGNLC, model: str, nlive: int, maxbatch: int, seed: int, outdi
     weights /= weights.sum()
 
     posterior = resample_equal(result.samples, weights, rstate=np.random.default_rng(seed + 1))
-    if outdir is not None:
-        outdir = Path(outdir / f"{lc.oid}")
-        outdir.mkdir(parents=True, exist_ok=True)
-        pd.DataFrame(posterior, columns=names).to_csv(outdir / f"{model}_posterior.csv", index=False)
+
+    outdir = get_result_path(lc, seed)
+    outdir.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(posterior, columns=names).to_csv(outdir / f"{model}_posterior.csv", index=False)
 
     summaries = {}
     posterior_medians = {}
@@ -69,23 +69,25 @@ def fit_model(lc: AGNLC, model: str, nlive: int, maxbatch: int, seed: int, outdi
         "filter_settings": lc.filter_settings,
     }
 
-    if outdir is not None:
-        (outdir / f"{model}_results.json").write_text(json.dumps(model_result, indent=2), encoding="utf-8")
+    (outdir / f"{model}_results.json").write_text(json.dumps(model_result, indent=2), encoding="utf-8")
 
-        np.savez_compressed(
-            outdir / f"{model}_nested_samples.npz",
-            samples=result.samples,
-            logl = result.logl,
-            logwt = result.logwt,
-            logz = result.logz,
-            logzerr = result.logzerr,
-            weights = weights,
-            ncall = result.ncall,
-            parameter_names = np.array(names)
-        )
+    np.savez_compressed(
+        outdir / f"{model}_nested_samples.npz",
+        samples=result.samples,
+        logl = result.logl,
+        logwt = result.logwt,
+        logz = result.logz,
+        logzerr = result.logzerr,
+        weights = weights,
+        ncall = result.ncall,
+        parameter_names = np.array(names)
+    )
     return model_result
 
-def read_result_json(lc: AGNLC, model: str):
-    RESULTS_PATH = PROJECT_ROOT.parent / "data" / "results" / f"{lc.oid}" / f"{model}_results.json"
+def read_result_json(lc: AGNLC, model: str, seed: int):
+    RESULTS_PATH = get_result_path(lc, seed) / f"{model}_results.json"
     result = json.loads(RESULTS_PATH.read_text(encoding="utf-8"))
     return result
+
+def get_result_path(lc: AGNLC, seed: int) -> Path:
+    return Path(PROJECT_ROOT.parent / "data" / "results" / str(lc.oid) / f"{lc.filter_settings["filtercode"]}" / f"seed{seed}")

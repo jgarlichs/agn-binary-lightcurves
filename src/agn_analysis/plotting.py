@@ -9,10 +9,13 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 STYLE_PATH = PROJECT_ROOT.parent / "src" / "light.mplstyle"
 plt.style.use(STYLE_PATH)
 from .model import AGNLC
+from .fitting import get_result_path
 
 def plot_fitted_model(lc: AGNLC, result, n_grid=500, show=True):
     model = result["model"]
     p = result["maximum_likelihood_sample"]["parameters"]
+    seed = result["sampler_settings"]["seed"]
+    outdir = get_result_path(lc, seed)
 
     t_plot = np.linspace(lc.t.min(), lc.t.max(), n_grid)
 
@@ -70,7 +73,7 @@ def plot_fitted_model(lc: AGNLC, result, n_grid=500, show=True):
     ax.set_title(f"AGN {lc.oid} - {model}")
     ax.legend()
     plt.tight_layout()
-    plt.savefig(PROJECT_ROOT.parent / "data" / "results" / str(lc.oid) / f"{model}_fitted_lc.png")
+    plt.savefig(outdir / f"{model}_fitted_lc.png")
     if show:
         plt.show()
     else:
@@ -91,8 +94,8 @@ LATEX_LABELS = {
     "Tq": r"$T_{\mathrm{q}}$",
 }
 
-def plot_corner(lc: AGNLC, model: str, show=True):
-    result_folder = PROJECT_ROOT.parent / "data" / "results" / str(lc.oid)
+def plot_corner(lc: AGNLC, model: str, seed: int, show=True):
+    result_folder = get_result_path(lc, seed)
     posterior = pd.read_csv(result_folder / f"{model}_posterior.csv")
     params = [*posterior]
     labels = [
