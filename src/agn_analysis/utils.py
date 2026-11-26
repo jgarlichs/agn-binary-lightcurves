@@ -98,17 +98,27 @@ class AGNLC:
         logdet = 2 * np.log(np.diag(chol[0])).sum()
         return float(-0.5 * (residual @ alpha + logdet + self.n * np.log(2 * np.pi)))
 
-def load_lc(path: Path, time_col: str, mag_col: str, err_col: str):
+def load_lc(path: Path, time_col: str, mag_col: str, err_col: str, filtercode: str):
+
+    if not (filtercode == "zg") or (filtercode == "zr") or (filtercode == "zi"):
+        raise ValueError("Choose a filtercode between zg, zr or zi.")
+
     df = pd.read_csv(path)
 
-    oid = (df["oid"][0])
+    correct_filtercode = df["filtercode"] == filtercode
+
+    df = df.loc[correct_filtercode]
+    counts = df["oid"].value_counts()
+    oid = counts.index[0]
+    mask = df["oid"] == oid
+    df = df.loc[mask]
 
     df = df[[time_col, mag_col, err_col]].apply(pd.to_numeric)
 
     good = np.isfinite(df.to_numpy()).all(axis=1)
     df = df.loc[good].sort_values(time_col)
 
-    print(f"Loaded {len(df)} valid observatrions from {path}.")
+    print(f"Loaded {len(df)} valid observations from {path} in band {filtercode}.")
     return AGNLC(oid, df[time_col].to_numpy(), df[mag_col].to_numpy(), df[err_col].to_numpy())
 
 def fit_model(lc: AGNLC, model: str, nlive: int, maxbatch: int, seed: int, outdir: Path | None = None):
