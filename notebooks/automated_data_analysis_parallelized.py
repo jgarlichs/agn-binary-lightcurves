@@ -21,7 +21,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 LIGHTCURVE_PATH = SCRIPT_DIR.parent / "data" / "lightcurves"
 RESULTS_PATH = SCRIPT_DIR.parent / "data" / "results"
 
-OBJECTS = None #["UM211"] # list of objects to analyse (None if all)
+OBJECTS = None  # list of objects to analyse (None if all)
 
 MODELS = ["red", "red_qpo_sine"] # list of models used
 
@@ -31,7 +31,7 @@ SEED = 42
 
 OVERWRITE = True
 BAND = "zg"
-N_WOKRERS = 10
+N_WOKRERS = 5
 MAKE_PLOTS = True
 
 def run_fit(path: Path, model: str) -> dict:

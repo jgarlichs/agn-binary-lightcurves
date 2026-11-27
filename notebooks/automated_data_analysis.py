@@ -14,7 +14,7 @@ from agn_analysis.data import load_lc
 from agn_analysis.fitting import fit_model, get_result_path
 from agn_analysis.plotting import plot_corner, plot_fitted_model
 
-OBJECTS = None #["UM211"] # list of objects to analyse (None if all)
+OBJECTS = ["QNZ3:54"] # list of objects to analyse (None if all)
 LIGHTCURVE_PATH = SCRIPT_DIR.parent / "data" / "lightcurves"
 RESULTS_PATH = SCRIPT_DIR.parent / "data" / "results"
 

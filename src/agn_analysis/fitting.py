@@ -16,9 +16,17 @@ def fit_model(lc: AGNLC, model: str, nlive: int, maxbatch: int, seed: int, print
     def logl(theta):
         return lc.loglikelihood(theta, model)
 
-    sampler = dynesty.DynamicNestedSampler(logl, transform, ndim=len(names), nlive=nlive, bound="multi", sample="rwalk", rstate=np.random.default_rng(seed))
+    # sampler settings
+    periodic = names.index("phi") if "phi" in names else None
+    bound = "multi"
+    sample = "rwalk"
+    nlive_batch = max(50, nlive // 2)
+    dlogz_init = 0.01
+    wt_kwargs = {"pfrac": 0.4}
 
-    sampler.run_nested(nlive_init=nlive, nlive_batch=max(50, nlive // 2), dlogz_init=0.2, maxbatch=maxbatch, print_progress=print_progress)
+    sampler = dynesty.DynamicNestedSampler(logl, transform, ndim=len(names), nlive=nlive, bound=bound, sample=sample, rstate=np.random.default_rng(seed), periodic=periodic)
+
+    sampler.run_nested(nlive_init=nlive, nlive_batch=nlive_batch, dlogz_init=dlogz_init, maxbatch=maxbatch, print_progress=print_progress, wt_kwargs=wt_kwargs)
 
     result = sampler.results
 
@@ -60,7 +68,7 @@ def fit_model(lc: AGNLC, model: str, nlive: int, maxbatch: int, seed: int, print
         "n_likelihood_evaluations": int(result.ncall.sum()),
         "n_posterior_samples": int(len(posterior)),
         "sampler_settings": {
-            "nlive": int(nlive), "maxbatch": int(maxbatch), "seed": int(seed)
+            "nlive": int(nlive), "maxbatch": int(maxbatch), "seed": int(seed), "periodic": periodic, "bound": bound, "sample": sample, "nlive_batch": nlive_batch, "dlogz_init": dlogz_init, "wt_kwargs": wt_kwargs
         },
         "prior_ranges": {
             name: [float(v) for v in (lc.prior_m if name == "m" else PRIOR_RANGES[name])]
