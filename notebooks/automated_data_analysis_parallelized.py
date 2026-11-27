@@ -21,13 +21,13 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 LIGHTCURVE_PATH = SCRIPT_DIR.parent / "data" / "lightcurves"
 RESULTS_PATH = SCRIPT_DIR.parent / "data" / "results"
 
-OBJECTS = None  # list of objects to analyse (None if all)
+OBJECTS = ["J141425+171811", "J133654+171040"]  # list of objects to analyse (None if all)
 
 MODELS = ["red", "red_qpo_sine"] # list of models used
 
 NLIVE = 500
 BATCHES = 5
-SEED = 42
+SEED = 101
 
 OVERWRITE = True
 BAND = "zg"

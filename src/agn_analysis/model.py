@@ -16,6 +16,25 @@ PRIOR_RANGES = {
     "Tq": (0.3, 10.0)
 }
 
+def red_noise_kernel(tau: np.ndarray, p: dict, model: str):
+    """ Red-noise (x QPO) covariance for time lags tau"""
+    tau0 = np.exp(p["log_tau0"])
+    sigmahat2 = np.exp(p["log_sigmahat2"])
+    gamma = 1.0 if model.startswith("drw") else p["gamma"]
+
+    K = 0.5 * sigmahat2 * tau0 * np.exp(-(tau / tau0)**gamma)
+
+    if "qpo" in model:
+        K *= np.cos(2 * np.pi * tau / p["Tq"])
+    return K
+
+def mean_function(t: np.ndarray, p: dict, model: str):
+    mean = np.full(len(t), p["m"], dtype=float)
+    if "sine" in model:
+        mean += p["A"] * np.sin(2 * np.pi * t / p["T0"] + p["phi"])
+
+    return mean
+
 def theta_names(model: str):
     if model not in MODELS:
         raise ValueError(f"Unknown model.")
@@ -59,33 +78,21 @@ class AGNLC:
         ranges = {**PRIOR_RANGES, "m": self.prior_m}
         return np.array([ranges[k][0] + (ranges[k][1] - ranges[k][0]) * v for k, v in zip(names, u)], dtype=float)
 
-    def loglikelihood(self, theta: np.ndarray, model: str):
-        p = dict(zip(theta_names(model), theta))
-        tau0 = np.exp(p["log_tau0"])
-        sigmahat2 = np.exp(p["log_sigmahat2"])
-        gamma = 1.0 if model.startswith("drw") else p["gamma"]
-
-        # red noise covariance matrix
-        C = 0.5 * sigmahat2 * tau0 * np.exp(-(self.tau/tau0)**gamma)
-
-        # QPO multiplied with covariance matrix
-        if "qpo" in model:
-            C *= np.cos(2 * np.pi * self.tau / p["Tq"])
-
+    def covariance(self, p: dict, model: str):
+        C = red_noise_kernel(self.tau, p, model)
         # white noise of measurement
         C[self.diag] += (p["nu"] * self.dy)**2
+        return C
+    def loglikelihood(self, theta: np.ndarray, model: str):
 
-        # vectorize mean
-        mean = np.full(self.n, p["m"])
-        # add sine signal
-        if "sine" in model:
-            mean += p["A"] * np.sin(2 * np.pi * self.t / p["T0"] + p["phi"])
+        p = dict(zip(theta_names(model), theta))
 
-        residual = self.y - mean
-
+        C = self.covariance(p, model)
+        residual = self.y - mean_function(self.t, p, model)
+    
         # calculate the Cholesky decomposition to evaluate the inverse and ln|C|
         chol = cho_factor(C, lower=True, check_finite=False)
         alpha = cho_solve(chol, residual, check_finite=False)
-
+    
         logdet = 2 * np.log(np.diag(chol[0])).sum()
         return float(-0.5 * (residual @ alpha + logdet + self.n * np.log(2 * np.pi)))

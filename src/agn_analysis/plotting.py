@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 STYLE_PATH = PROJECT_ROOT.parent / "src" / "light.mplstyle"
 plt.style.use(STYLE_PATH)
-from .model import AGNLC
+from .model import AGNLC, red_noise_kernel, mean_function
 from .fitting import get_result_path
 
 def plot_fitted_model(lc: AGNLC, result, n_grid=500, show=True):
@@ -19,43 +19,21 @@ def plot_fitted_model(lc: AGNLC, result, n_grid=500, show=True):
 
     t_plot = np.linspace(lc.t.min(), lc.t.max(), n_grid)
 
-    def kernel(t1, t2):
-        dt = np.abs(t1[:, None] - t2[None, :])
+    tau_plot = np.abs(t_plot[:, None] - lc.t[None, :])
 
-        tau0 = np.exp(p["log_tau0"])
-        sigmahat2 = np.exp(p["log_sigmahat2"])
-        gamma = 1.0 if model.startswith("drw") else p["gamma"]
+    C = lc.covariance(p, model)
 
-        K = 0.5 * sigmahat2 * tau0 * np.exp(-(dt/tau0)**gamma)
+    K_star = red_noise_kernel(tau_plot, p, model)
 
-        if "qpo" in model:
-            K *= np.cos(2 * np.pi * dt / p["Tq"])
-
-        return K
-
-    def mean_function(t):
-        mean = np.full(len(t), p["m"])
-
-        if "sine" in model:
-            mean += p["A"] * np.sin(2 * np.pi * t / p["T0"] + p["phi"])
-
-        return mean
-
-
-    C = kernel(lc.t, lc.t)
-    C[lc.diag] += (p["nu"] * lc.dy)**2
-
-    K_star = kernel(t_plot, lc.t)
-
-    residual = lc.y - mean_function(lc.t)
+    residual = lc.y - mean_function(lc.t, p, model)
     chol = cho_factor(C, lower=True)
     alpha = cho_solve(chol, residual)
 
-    y_fit = mean_function(t_plot) + K_star @ alpha
+    y_fit = mean_function(t_plot, p, model) + K_star @ alpha
 
     V = solve_triangular(chol[0], K_star.T, lower=True)
 
-    prior_var = 0.5 * np.exp(p["log_sigmahat2"]) * np.exp(p["log_tau0"])
+    prior_var = red_noise_kernel(0.0, p, model)
 
     y_std = np.sqrt(np.maximum(prior_var - np.sum(V**2, axis=0), 0))
 
